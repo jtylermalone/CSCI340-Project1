@@ -81,34 +81,7 @@ void printGraph(struct Graph* graph)
 
 int main()
 {
-    int x = 3;
-    int y = 3;
-    int testArray[x][y];
-    for (int i = 0; i < x; i++)
-	for (int j = 0; j < y; j++)
-		testArray[x][y] = x + y;
-   
-    for (int i = 0; i < x; i++)
-	for (int j = 0; j < y; j++)
-		printf("testArray[%d][%d]: %d\n", x, y, testArray[x][y]);
-
-    testArray[2][2] = 5;
-
-    printf("%d\n", testArray[2][2]);
-    // create the graph given in above fugure
-    int V = 5;
-    struct Graph* graph = createGraph(V);
-    addEdge(graph, "a", "b");
-    addEdge(graph, "a", "e");
-    addEdge(graph, "b", "c");
-    addEdge(graph, "b", "d");
-    addEdge(graph, "b", "e");
-    addEdge(graph, "c", "d");
-    addEdge(graph, "d", "e");
-
-
-    // print the adjacency list representation of the above graph
-    printGraph(graph);
-
+    char *str = "(Hello)";
+    printf("%s\n", str);
     return 0;
 }
