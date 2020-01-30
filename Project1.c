@@ -26,7 +26,7 @@ struct Process {
 struct Vertex {
    bool visited;
    char label[10];
-   struct Process parent;
+   char parent[10];
 };
 
 //stack variables
@@ -66,9 +66,10 @@ bool isStackEmpty() {
 //graph functions
 
 //add vertex to the vertex list
-void addVertex(char *label) {
+void addVertex(char *label, char *parent) {
    struct Vertex* vertex = (struct Vertex*) malloc(sizeof(struct Vertex));
    strcpy(vertex->label, label);
+   strcpy(vertex->parent, parent);
    //vertex->label = label;  
    vertex->visited = false;     
    lstVertices[vertexCount++] = vertex;
@@ -82,7 +83,8 @@ void addEdge(int start,int end) {
 
 //display the vertex
 void displayVertex(int vertexIndex) {
-   printf("%s ",lstVertices[vertexIndex]->label);
+   printf("%s %s\n",lstVertices[vertexIndex]->label, lstVertices[vertexIndex]->parent);
+   
 }       
 
 //get the adjacent unvisited vertex
@@ -247,7 +249,7 @@ int main(void)
 			strcpy(newProcess.name, comm);
 			strcpy(newProcess.vsize, vsize);
 			newProcess.procNum = processCounter;
-			addVertex(newProcess.pid);
+			addVertex(newProcess.pid, newProcess.ppid);
 
 			// adding the new process to the processes list
 			processes[processCounter] = newProcess;
