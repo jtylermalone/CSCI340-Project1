@@ -8,22 +8,30 @@
 
 struct Process {
 	
-	
-	// each process has a 	
 	char pid[10];
 	char ppid[10];
 	char name[40];
 	char vsize[16];
+	// this attribute is useful in the adjacency
+	// matrix... the first process struct created
+	// will have a procNum of 0, the 2nd one will 
+	// be 1, and so on.
 	int procNum;
 };
 
 // everything between here and the next long line of slashes is stuff
-// I copied straight from the internet. I've never implemented a  before.
+// I copied straight from the internet (however I have made a couple of
+// changes here and there). I've never implemented a graph before.
 /////////////////////////////////////////////////////////////////////////////////////////
 
+// 300 may not be enough space in the long run.. this assumes
+// that there will never be more than 300 processes at once.
+// Usually the count is at around 180 with firefox, the terminal,
+// this program running, and the "files" navigator open.
 #define MAX 300
 
 struct Vertex {
+   // I added the label and parent fields here.
    bool visited;
    char label[10];
    char parent[10];
@@ -66,10 +74,11 @@ bool isStackEmpty() {
 //graph functions
 
 //add vertex to the vertex list
+// I added "char *parent" as a parameter here
 void addVertex(char *label, char *parent) {
    struct Vertex* vertex = (struct Vertex*) malloc(sizeof(struct Vertex));
    strcpy(vertex->label, label);
-   strcpy(vertex->parent, parent);
+   strcpy(vertex->parent, parent); // I added this line
    //vertex->label = label;  
    vertex->visited = false;     
    lstVertices[vertexCount++] = vertex;
@@ -78,11 +87,12 @@ void addVertex(char *label, char *parent) {
 //add edge to edge array
 void addEdge(int start,int end) {
    adjMatrix[start][end] = 1;
-   //adjMatrix[end][start] = 1;
+   //adjMatrix[end][start] = 1; // took this out because the graph only needs to be one way (I think!)
 }
 
 //display the vertex
 void displayVertex(int vertexIndex) {
+   // I also modified this print statement a bit for debugging purposes.
    printf("%s %s\n",lstVertices[vertexIndex]->label, lstVertices[vertexIndex]->parent);
    
 }       
@@ -100,6 +110,7 @@ int getAdjUnvisitedVertex(int vertexIndex) {
    return -1;
 }
 
+// I have no idea if a depth first traversal is the way to go or not
 void depthFirstSearch() {
    printf("in depthFirstSearch()\n");
    int i;
@@ -160,8 +171,8 @@ int main(void)
 		// and de->d_name is used to obtain the directory name.
 		char* dirName = de->d_name;
 		
-		// This if statement is ugly and long, but it works. It makes sure we 
-		// only interact with folders that have numeric names.
+		// This if statement is ugly and long, but it works (at least I think). 
+		//It makes sure we only interact with folders that have numeric names.
 		if (dirName[0] == '0' || dirName[0] == '1' || dirName[0] == '2' || dirName[0] == '3' || dirName[0] == '4' || 
 		  dirName[0] == '6' || dirName[0] == '7' || dirName[0] == '8' || dirName[0] == '9'){
 			
@@ -170,6 +181,9 @@ int main(void)
 	}
 
 	closedir(dr);
+		
+	// this list will hold all of the process structs that we instantiate.
+	// I don't know if it's actually useful or not.
 	struct Process processes[numberOfProcesses * sizeof(struct Process)];
 	int processCounter = 0;
 	dr = opendir("/proc/");
@@ -217,7 +231,7 @@ int main(void)
 			// this if statement executes if the process name is two words (i.e. contains
 			// a space). Since each comm ends with a ), if there is a space in the comm
 			// name then comm (at this point) won't end with ). Then, we have to combine 
-			// both parts of comm.
+			// both parts of comm. I hope that makes some sort of sense.
 			if (comm[strlen(comm)-1] != ')'){
 				
 
@@ -254,10 +268,14 @@ int main(void)
 			// adding the new process to the processes list
 			processes[processCounter] = newProcess;
 
+			// processCounter is what is being assigned to each
+			// process struct's procNum field.
 			processCounter += 1;
 
 			
-			//printf("PID: %s\nCOMM: %s\nPPID: %s\nVSIZE: %s\n\n\n", dirName, comm, ppid, vsize);
+			// here we are resetting each of the variable's back
+			// so that they're blank. C is weird so I think
+			// this is necessary here...
 			memset(fileName, 0, strlen(fileName));
 			memset(dirName, 0, strlen(dirName));
 			memset(comm, 0, strlen(comm));
@@ -275,17 +293,20 @@ int main(void)
       		for(int j = 0; j < MAX; j++) 
          		adjMatrix[i][j] = 0;
 
+	// I think what's going on here is that edges are being added
+	// to the graph (not sure if they're added correctly) and I am 
+	// (I think!) correctly changing the relevant entries in the 	
+	// adjacency matrix to 1's. 
 	for (int i = 0; i < numberOfProcesses; i++){
-		//printf("PID: %s\n", processes[i].pid);
 		for (int j = 0; j < numberOfProcesses; j++){
-			//printf("    PPID: %s\n procnum: %d\n", processes[j].ppid, processes[j].procNum);
 			if (strcmp(processes[i].pid, processes[j].ppid) == 0){
 				addEdge(processes[i].procNum, processes[j].procNum);
 				adjMatrix[processes[i].procNum][processes[j].procNum] = 1;
-				//printf("true ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 			}
 		
-		}
+		}	
+
+		// This print statement is for debugging purposes only
 		printf("pid: %s ppid: %s name: %s vsize: %s\n\n", processes[i].pid, processes[i].ppid, processes[i].name,
 		   processes[i].vsize);
 		
