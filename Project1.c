@@ -12,142 +12,155 @@ struct Process {
 	char ppid[10];
 	char name[40];
 	char vsize[16];
-	// this attribute is useful in the adjacency
-	// matrix... the first process struct created
-	// will have a procNum of 0, the 2nd one will 
-	// be 1, and so on.
-	int procNum;
+	int visited;
+	char *parentProcess;
+	int numChildren;
+	int childProcess[];
 };
 
-// everything between here and the next long line of slashes is stuff
-// I copied straight from the internet (however I have made a couple of
-// changes here and there). I've never implemented a graph before.
-/////////////////////////////////////////////////////////////////////////////////////////
+void buildTree(struct Process processes[], int numProcesses) {
 
-// 300 may not be enough space in the long run.. this assumes
-// that there will never be more than 300 processes at once.
-// Usually the count is at around 180 with firefox, the terminal,
-// this program running, and the "files" navigator open.
-#define MAX 300
 
-struct Vertex {
-   // I added the label and parent fields here.
-   bool visited;
-   char label[10];
-   char parent[10];
-};
-
-//stack variables
-
-int stack[MAX]; 
-int top = -1; 
-
-//graph variables
-
-//array of vertices
-struct Vertex* lstVertices[MAX];
-
-//adjacency matrix
-int adjMatrix[MAX][MAX];
-
-//vertex count
-int vertexCount = 0;
-
-//stack functions
-
-void push(int item) { 
-   stack[++top] = item; 
-} 
-
-int pop() { 
-   return stack[top--]; 
-} 
-
-int peek() {
-   return stack[top];
+	for (int i = 0; i < numProcesses; i++){
+		//printf("%s\n", processes[i].pid);
+		int childProcs = 0;
+		for (int j = 0; j < numProcesses; j++) {
+			//printf("pid: %s   ppid: %s\n", processes[i].pid, processes[j].ppid);
+			if (strcmp(processes[i].pid, processes[j].ppid) == 0) {
+				//printf("pid %s    child pid: %s\n", processes[i].pid, processes[j].pid);
+				int childPID = atoi(processes[j].pid);
+				//printf("CHILDPID 1: %d\n", childPID);
+				processes[i].childProcess[childProcs] = childPID;
+				//printf("CHILDPID 2: %d\n\n", processes[i].childProcess[childProcs]);
+				printf("childProcs: %d\n", childProcs);
+				//childProcs++;
+			}
+		}
+		
+		processes[i].numChildren = childProcs;
+		//printf("pid: %s  number of children: %d\n", processes[i].pid, processes[i].numChildren);
+	}
+	/*
+	for (int i = 0; i < numProcesses; i++){
+		printf("(%s) %s , %s kb\n", processes[i].pid, processes[i].name, processes[i].vsize);
+		int childProcs = 0;
+		printf("pid:      %s\n", processes[i].pid);
+		for (int j = 0; j < numProcesses; j++) {
+			if (atoi(processes[i].pid) == atoi(processes[j].ppid)){
+				printf("pid: %d   ppid: %d\n", atoi(*processes[i].pid), atoi(processes[j].ppid));
+				int childPID = *processes[j].pid;
+				processes[i].childProcess[childProcs] = processes[j].pid;
+				
+				childProcs++;
+			}
+			
+		}
+		processes[i].numChildren = childProcs;
+		//printf("$$$$$$$$$$$$$$$$ childProcs: %d\n", processes[i].numChildren);
+		
+	}
+		// This print statement is for debugging purposes only
+		//printf("pid: %s ppid: %s name: %s vsize: %s\n\n", processes[i].pid, processes[i].ppid, processes[i].name,
+		   //processes[i].vsize);
+	
+	*/
 }
 
-bool isStackEmpty() {
-   return top == -1;
+/*
+void preorderTraversal(struct Process rootProc, struct Process processes[], int numProcesses) {
+	
+	if (rootProc.childProcess[0] == -1)
+		return;
+
+	printf("(%s) %s , %s kb\n", rootProc.pid, rootProc.name, rootProc.vsize);
+
+	for (int i = 0; i < rootProc.numChildren; i++) {
+		for (int j = 0; j < numProcesses; j++) {
+			//printf("number of children: %d\n", rootProc.numChildren);
+			if (rootProc.childProcess[i] == atoi(processes[j].pid)) {
+				for (int k = 0; k < rootProc.numChildren; k++) {
+					//printf("child %d: %d", i, rootProc.childProcess[i]);	
+					
+					printf("(%s) %s , %s kb\n", rootProc.pid, rootProc.name, rootProc.vsize);
+					//printf(": (%s) %s , %s kb\n", processes[j].pid, processes[j].name, processes[j].vsize);
+					//preorderTraversal(processes[j], processes, numProcesses);
+					printf("*****************************\n");
+					}
+			}
+		}
+	}	
+
+	
+}
+*/
+struct Process findProcess(struct Process processes[], int processesSize, int pid) {
+
+	for (int i = 0; i < processesSize; i++)
+		if (atoi(processes[i].pid) == pid)
+			return processes[i];
 }
 
-//graph functions
 
-//add vertex to the vertex list
-// I added "char *parent" as a parameter here
-void addVertex(char *label, char *parent) {
-   struct Vertex* vertex = (struct Vertex*) malloc(sizeof(struct Vertex));
-   strcpy(vertex->label, label);
-   strcpy(vertex->parent, parent); // I added this line
-   //vertex->label = label;  
-   vertex->visited = false;     
-   lstVertices[vertexCount++] = vertex;
+
+void preorderTraversal(struct Process rootProc, struct Process processes[], int processesSize) {
+
+	int size = rootProc.numChildren;
+	if (size <= 0)
+		return;
+
+	for (int i = 0; i < size; i++) {
+		int procNum = rootProc.childProcess[i];
+		
+		for (int j = 0; j < processesSize; j++) {
+
+			//if (processes[j].pid == procNum)
+			
+		}
+	}
+
 }
 
-//add edge to edge array
-void addEdge(int start,int end) {
-   adjMatrix[start][end] = 1;
-   //adjMatrix[end][start] = 1; // took this out because the graph only needs to be one way (I think!)
+
+//////////////////////////////////////////////////////////////  /////////
+void printChildren(struct Process processes[], int processesSize) {
+
+	for (int i = 0; i < processesSize; i++) {
+		int size = processes[i].numChildren;
+		printf("parent pid: %s\n", processes[i].pid);
+		for (int j = 0; j < processesSize; j++) {
+			if ((strcmp(processes[i].pid, processes[j].ppid) == 0)){
+				printf("     pid: %s parent pid: %s\n", processes[j].pid, processes[j].ppid);
+
+			}
+		}
+
+	}
+	/*
+	int size = parentProcess.numChildren;
+	if (size == 0)
+		return;
+
+	//printf("size: %d\n", size);
+	if (size != 0)
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < processesSize; j++) {
+				if (parentProcess.childProcess[i] == atoi(processes[j].pid)){
+					printf("childprocess: %d   pid: %d\n     ", parentProcess.childProcess[i], atoi(processes[j].pid));	
+					//printf("********************************\n\n");
+					printChildren(processes[j], processes, processesSize);
+				}
+			}
+		}
+	//for (int i = 0; i < size; i++) {
+		//printf("      children: %d\n", parentProcess.childProcess[i]);
+		//for (int j = 0; j < processesSize; j++){
+			
+			//printf("     child pid: %d\n", parentProcess.childProcess[i]);
+		//}
+	
+*/
 }
 
-//display the vertex
-void displayVertex(int vertexIndex) {
-   // I also modified this print statement a bit for debugging purposes.
-   printf("%s %s\n",lstVertices[vertexIndex]->label, lstVertices[vertexIndex]->parent);
-   
-}       
-
-//get the adjacent unvisited vertex
-int getAdjUnvisitedVertex(int vertexIndex) {
-   int i;
-
-   for(i = 0; i < vertexCount; i++) {
-      if(adjMatrix[vertexIndex][i] == 1 && lstVertices[i]->visited == false) {
-         return i;
-      }
-   }
-
-   return -1;
-}
-
-// I have no idea if a depth first traversal is the way to go or not
-void depthFirstSearch() {
-   printf("in depthFirstSearch()\n");
-   int i;
-
-   //mark first node as visited
-   lstVertices[0]->visited = true;
-
-   //display the vertex
-   displayVertex(0);   
-
-   //push vertex index in stack
-   push(0);
-
-   while(!isStackEmpty()) {
-      //get the unvisited vertex of vertex which is at top of the stack
-      int unvisitedVertex = getAdjUnvisitedVertex(peek());
-
-      //no adjacent vertex found
-      if(unvisitedVertex == -1) {
-         pop();
-      } else {
-         lstVertices[unvisitedVertex]->visited = true;
-         displayVertex(unvisitedVertex);
-         push(unvisitedVertex);
-      }
-   }
-
-   //stack is empty, search is complete, reset the visited flag        
-   for(i = 0;i < vertexCount;i++) {
-      lstVertices[i]->visited = false;
-   }   
-   printf("\ndepthFirst complete\n");     
-}
-
-// everything above here and below the above line of slashes I copied
-// straight from the internet. I've never implemented a graph before.
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 int main(void)
 {
 	// all of this business about
@@ -262,8 +275,7 @@ int main(void)
 			strcpy(newProcess.ppid, ppid);
 			strcpy(newProcess.name, comm);
 			strcpy(newProcess.vsize, vsize);
-			newProcess.procNum = processCounter;
-			addVertex(newProcess.pid, newProcess.ppid);
+		
 
 			// adding the new process to the processes list
 			processes[processCounter] = newProcess;
@@ -289,26 +301,16 @@ int main(void)
 	closedir(dr);
 	
 	// set adjacency matrix to all zeros
-	for(int i = 0; i < MAX; i++) 
-      		for(int j = 0; j < MAX; j++) 
-         		adjMatrix[i][j] = 0;
-
+	
 	// I think what's going on here is that edges are being added
 	// to the graph (not sure if they're added correctly) and I am 
 	// (I think!) correctly changing the relevant entries in the 	
 	// adjacency matrix to 1's. 
 	for (int i = 0; i < numberOfProcesses; i++){
-		for (int j = 0; j < numberOfProcesses; j++){
-			if (strcmp(processes[i].pid, processes[j].ppid) == 0){
-				addEdge(processes[i].procNum, processes[j].procNum);
-				adjMatrix[processes[i].procNum][processes[j].procNum] = 1;
-			}
 		
-		}	
-
 		// This print statement is for debugging purposes only
-		printf("pid: %s ppid: %s name: %s vsize: %s\n\n", processes[i].pid, processes[i].ppid, processes[i].name,
-		   processes[i].vsize);
+		//printf("pid: %s ppid: %s name: %s vsize: %s\n\n", processes[i].pid, processes[i].ppid, processes[i].name,
+		   //processes[i].vsize);
 		
 		
 	}
@@ -316,8 +318,20 @@ int main(void)
 	
 
 	printf("number of processes: %d\n", numberOfProcesses);
-	depthFirstSearch();
+	buildTree(processes, numberOfProcesses);
+	//printf("number of children: %d\n", processes[0].numChildren);
+	//preorderTraversal(processes[0], processes, numberOfProcesses);
+	//for (int i = 0; i < processes[0].numChildren; i++)
+		//printf("child %d: %d\n", i, processes[0].childProcess[i]);
+	//printChildren(processes[0]);
+	//struct Process test = findProcess(processes, numberOfProcesses, 1364);
+	//printf("**** %s\n", test.pid);
+	for (int i = 0; i < numberOfProcesses; i++){
+		//printf("i: %d\n", i);
+		printChildren(processes, numberOfProcesses);
+	}
 	printf("Done!\n");
+
 	return 0;
 	
 }
