@@ -15,11 +15,13 @@ struct Process {
 	int visited;
 	char *parentProcess;
 	int numChildren;
+	struct Process *next;
 	int childProcess[];
+	
+
 };
 
 void buildTree(struct Process processes[], int numProcesses) {
-
 
 	for (int i = 0; i < numProcesses; i++){
 		//printf("%s\n", processes[i].pid);
@@ -32,8 +34,8 @@ void buildTree(struct Process processes[], int numProcesses) {
 				//printf("CHILDPID 1: %d\n", childPID);
 				processes[i].childProcess[childProcs] = childPID;
 				//printf("CHILDPID 2: %d\n\n", processes[i].childProcess[childProcs]);
-				printf("childProcs: %d\n", childProcs);
-				//childProcs++;
+				//printf("childProcs: %d\n", childProcs);
+				childProcs++;
 			}
 		}
 		
@@ -158,6 +160,53 @@ void printChildren(struct Process processes[], int processesSize) {
 			//printf("     child pid: %d\n", parentProcess.childProcess[i]);
 		//}
 	
+*/
+}
+
+void printProcesses(struct Process currentNode, struct Process processes[], int processesSize, int spacesNum) {
+		
+	printf("(%s) %s, %s kb\n", currentNode.pid, currentNode.name, currentNode.vsize);
+	if (currentNode.numChildren == 0)
+		return;
+
+
+	for (int i = 0; i < processesSize; i++) {
+		//printf("child pid: %s\n", currentNode.pid);
+		int childrenNumber = processes[i].numChildren;
+		for (int j = 0; j < childrenNumber; j++){
+			//printf("j: %d\n", j);
+			//printf("     child pid: %d\n", processes[i].childProcess[j]);
+				
+			//for (int k = 0; k < spacesNum; k++)
+				//printf(" ");
+			//printf("\n");
+			currentNode = findProcess(processes, processesSize, processes[i].childProcess[j]);
+			for (int l = 0; l < i; l++)
+				printf(" ");
+			printf("  (%s) %s, %s kb   %s\n", currentNode.pid, currentNode.name, currentNode.vsize, currentNode.ppid);
+			//printProcesses(currentNode, processes, processesSize, spacesNum);
+
+			for (int k = 0; k < processesSize; k++) {
+				//if (atoi(currentNode.pid) == atoi(processes[i].pid))
+					//printf("processes[i].pid: %s\n", processes[i].pid);
+			}
+			//spacesNum = i * 2;
+			
+			
+			
+			
+		}
+	
+	}
+	
+	
+/*
+	printf("pid: %s", currentNode.pid);
+	if (currentNode.numChildren != 0) {
+		printf("    numChildren: %d\n", currentNode.numChildren);
+		
+		
+	}
 */
 }
 
@@ -297,7 +346,6 @@ int main(void)
 		}
 	}
 
-	
 	closedir(dr);
 	
 	// set adjacency matrix to all zeros
@@ -311,8 +359,6 @@ int main(void)
 		// This print statement is for debugging purposes only
 		//printf("pid: %s ppid: %s name: %s vsize: %s\n\n", processes[i].pid, processes[i].ppid, processes[i].name,
 		   //processes[i].vsize);
-		
-		
 	}
 
 	
@@ -326,10 +372,11 @@ int main(void)
 	//printChildren(processes[0]);
 	//struct Process test = findProcess(processes, numberOfProcesses, 1364);
 	//printf("**** %s\n", test.pid);
-	for (int i = 0; i < numberOfProcesses; i++){
+	//for (int i = 0; i < numberOfProcesses; i++){
 		//printf("i: %d\n", i);
-		printChildren(processes, numberOfProcesses);
-	}
+		//printChildren(processes, numberOfProcesses);
+	
+	printProcesses(processes[0], processes, numberOfProcesses, 0);
 	printf("Done!\n");
 
 	return 0;
