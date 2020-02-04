@@ -12,7 +12,7 @@ struct Process {
 	char ppid[10];
 	char name[40];
 	char vsize[16];
-	int visited;
+	int hasChildren;
 	char *parentProcess;
 	int numChildren;
 	struct Process *next;
@@ -38,8 +38,15 @@ void buildTree(struct Process processes[], int numProcesses) {
 				childProcs++;
 			}
 		}
-		
+		//printf("childProcs: %d\n", childProcs);
+		if (childProcs == 0) {
+			processes[i].hasChildren = 0;
+		}
+	
+		processes[i].hasChildren = 1;
 		processes[i].numChildren = childProcs;
+		//printf("numCHildren: %d\n", processes[i].numChildren);
+		
 		//printf("pid: %s  number of children: %d\n", processes[i].pid, processes[i].numChildren);
 	}
 	/*
@@ -166,31 +173,25 @@ void printChildren(struct Process processes[], int processesSize) {
 void printProcesses(struct Process currentNode, struct Process processes[], int processesSize, int spacesNum) {
 		
 	printf("(%s) %s, %s kb\n", currentNode.pid, currentNode.name, currentNode.vsize);
-	if (currentNode.numChildren == 0)
+	//printf("hasChildren: %d\n", currentNode.hasChildren);
+	//printf("numChildren: %d\n", currentNode.numChildren);
+	if (currentNode.hasChildren == 0)
 		return;
 
-
+		///  HERE /
 	for (int i = 0; i < processesSize; i++) {
 		//printf("child pid: %s\n", currentNode.pid);
 		int childrenNumber = processes[i].numChildren;
 		for (int j = 0; j < childrenNumber; j++){
-			//printf("j: %d\n", j);
-			//printf("     child pid: %d\n", processes[i].childProcess[j]);
-				
-			//for (int k = 0; k < spacesNum; k++)
-				//printf(" ");
-			//printf("\n");
 			currentNode = findProcess(processes, processesSize, processes[i].childProcess[j]);
-			for (int l = 0; l < i; l++)
+			printf("   (%s) %s, %s kb   parent: %s\n", currentNode.pid, currentNode.name, currentNode.vsize, currentNode.ppid);
+			//printProcesses(currentNode, processes, processesSize, spacesNum);
+			for (int l = 0; l < j; l++)
 				printf(" ");
-			printf("  (%s) %s, %s kb   %s\n", currentNode.pid, currentNode.name, currentNode.vsize, currentNode.ppid);
 			//printProcesses(currentNode, processes, processesSize, spacesNum);
 
 			for (int k = 0; k < processesSize; k++) {
-				//if (atoi(currentNode.pid) == atoi(processes[i].pid))
-					//printf("processes[i].pid: %s\n", processes[i].pid);
 			}
-			//spacesNum = i * 2;
 			
 			
 			
